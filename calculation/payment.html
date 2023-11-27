@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dairy Website Table</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #dddddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    .add-button {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dairy Website Monthly Report</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Months</th>
+        <th>Total income of the farmers</th>
+        <th>Total income from millema</th>
+        <th>Total income from selling milk</th>
+        <th>Profit</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      <!-- Rows will be added dynamically here -->
+    </tbody>
+  </table>
+
+  <button class="add-button" onclick="addRow()">Add Row</button>
+  <button class="add-button" onclick="saveData()">Save Data</button>
+
+  <script>
+    function calculateProfit(month) {
+      const farmersIncome = parseInt(document.getElementById(`farmers${month}`).value) || 0;
+      const millemaIncome = parseInt(document.getElementById(`millema${month}`).value) || 0;
+      const sellingMilkIncome = parseInt(document.getElementById(`sellingMilk${month}`).value) || 0;
+
+      const profit = millemaIncome - farmersIncome + sellingMilkIncome;
+      document.getElementById(`profit${month}`).textContent = profit;
+
+      // Save the data to localStorage
+      const rowData = {
+        farmersIncome,
+        millemaIncome,
+        sellingMilkIncome,
+        profit
+      };
+      localStorage.setItem(month, JSON.stringify(rowData));
+    }
+
+    function addRow() {
+      const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+
+      const tableBody = document.getElementById('table-body');
+
+      months.forEach((month) => {
+        const newRow = document.createElement('tr');
+        newRow.id = `row-${month}`;
+
+        const monthCell = document.createElement('td');
+        monthCell.textContent = month;
+
+        const farmersIncomeCell = document.createElement('td');
+        const farmersIncomeInput = document.createElement('input');
+        farmersIncomeInput.type = 'number';
+        farmersIncomeInput.id = `farmers${month}`;
+        farmersIncomeInput.addEventListener('input', () => calculateProfit(month));
+        farmersIncomeCell.appendChild(farmersIncomeInput);
+
+        const millemaIncomeCell = document.createElement('td');
+        const millemaIncomeInput = document.createElement('input');
+        millemaIncomeInput.type = 'number';
+        millemaIncomeInput.id = `millema${month}`;
+        millemaIncomeInput.addEventListener('input', () => calculateProfit(month));
+        millemaIncomeCell.appendChild(millemaIncomeInput);
+
+        const sellingMilkIncomeCell = document.createElement('td');
+        const sellingMilkIncomeInput = document.createElement('input');
+        sellingMilkIncomeInput.type = 'number';
+        sellingMilkIncomeInput.id = `sellingMilk${month}`;
+        sellingMilkIncomeInput.addEventListener('input', () => calculateProfit(month));
+        sellingMilkIncomeCell.appendChild(sellingMilkIncomeInput);
+
+        const profitCell = document.createElement('td');
+        const profitSpan = document.createElement('span');
+        profitSpan.id = `profit${month}`;
+        profitSpan.textContent = '0';
+        profitCell.appendChild(profitSpan);
+
+        newRow.appendChild(monthCell);
+        newRow.appendChild(farmersIncomeCell);
+        newRow.appendChild(millemaIncomeCell);
+        newRow.appendChild(sellingMilkIncomeCell);
+        newRow.appendChild(profitCell);
+
+        tableBody.appendChild(newRow);
+
+        // Retrieve data from localStorage if available
+        const rowData = JSON.parse(localStorage.getItem(month));
+        if (rowData) {
+          farmersIncomeInput.value = rowData.farmersIncome;
+          millemaIncomeInput.value = rowData.millemaIncome;
+          sellingMilkIncomeInput.value = rowData.sellingMilkIncome;
+          profitSpan.textContent = rowData.profit;
+        }
+      });
+    }
+
+    function saveData() {
+      // Save all data to localStorage
+      const tableRows = document.querySelectorAll('#table-body tr');
+      tableRows.forEach((row) => {
+        const month = row.cells[0].textContent;
+        const farmersIncome = parseInt(row.cells[1].querySelector('input').value) || 0;
+        const millemaIncome = parseInt(row.cells[2].querySelector('input').value) || 0;
+        const sellingMilkIncome = parseInt(row.cells[3].querySelector('input').value) || 0;
+        const profit = parseInt(row.cells[4].textContent) || 0;
+
+        const rowData = {
+          farmersIncome,
+          millemaIncome,
+          sellingMilkIncome,
+          profit
+        };
+        localStorage.setItem(month, JSON.stringify(rowData));
+      });
+
+      alert('Data saved to localStorage!');
+    }
+
+    // Load table data on page load
+    window.onload = addRow;
+  </script>
+</body>
+</html>
